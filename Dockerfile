@@ -104,6 +104,9 @@ RUN mkdir -p /opt && \
 
 ENV KOREADER_DIR=/opt/lib/koreader
 
+# SDL dummy driver for headless device/UIManager support
+ENV SDL_VIDEODRIVER=dummy
+
 # Lua paths: busted (apt) + KOReader modules
 ENV LUA_PATH="/usr/share/lua/5.1/?.lua;/usr/share/lua/5.1/?/init.lua;${KOREADER_DIR}/common/?.lua;${KOREADER_DIR}/frontend/?.lua;${KOREADER_DIR}/?.lua;;"
 ENV LUA_CPATH="/usr/lib/aarch64-linux-gnu/lua/5.1/?.so;/usr/lib/x86_64-linux-gnu/lua/5.1/?.so;${KOREADER_DIR}/common/?.so;;"
