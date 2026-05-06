@@ -181,6 +181,13 @@ function get_plugin_path() -- luacheck: ignore
     return os.getenv("PLUGIN_PATH") or "/opt/plugin"
 end
 
+--- Save a screenshot for debugging (headless framebuffer → PNG file).
+-- @param screen Screen object
+-- @param filename Output filename (saved to test data dir/screenshots/)
+function screenshot(screen, filename) -- luacheck: ignore
+    screen:shot(data_dir .. "/screenshots/" .. filename)
+end
+
 -- =============================================================================
 -- Plugin package path setup
 -- =============================================================================
