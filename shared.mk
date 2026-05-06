@@ -45,11 +45,13 @@ COMMONREQUIRE ?= /opt/koplugin-dev/commonrequire.lua
 DOCKER_RUN = docker run --rm \
 	-v "$(PLUGIN_DIR)":/opt/plugin \
 	-e PLUGIN_PATH=/opt/plugin \
+	-e PLUGIN_NAME=$(PLUGIN_NAME) \
 	$(IMAGE_NAME)
 
 DOCKER_RUN_IT = docker run --rm -it \
 	-v "$(PLUGIN_DIR)":/opt/plugin \
 	-e PLUGIN_PATH=/opt/plugin \
+	-e PLUGIN_NAME=$(PLUGIN_NAME) \
 	$(IMAGE_NAME)
 
 # =============================================================================

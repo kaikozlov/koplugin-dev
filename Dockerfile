@@ -123,8 +123,9 @@ COPY commonrequire.lua /opt/koplugin-dev/commonrequire.lua
 COPY shared.mk /opt/koplugin-dev/shared.mk
 
 # Plugin mount point — plugins bind-mount their source here
-RUN mkdir -p /opt/plugin && \
-    ln -sf /opt/plugin "${KOREADER_DIR}/plugins/plugin.koplugin"
+RUN mkdir -p /opt/plugin
+COPY entrypoint.sh /opt/koplugin-dev/entrypoint.sh
+ENTRYPOINT ["/opt/koplugin-dev/entrypoint.sh"]
 
 # =============================================================================
 # Default working directory
