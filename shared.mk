@@ -36,20 +36,23 @@ EXCLUDE_TAGS ?= e2e
 COMMONREQUIRE ?= /opt/koplugin-dev/commonrequire.lua
 
 # =============================================================================
-# Docker run command (shared)
+# Docker run commands (shared)
 # =============================================================================
 
-DOCKER_RUN = docker run --rm \
+# Base options shared across all docker run variants
+DOCKER_OPTS = --rm \
 	-v "$(PLUGIN_DIR)":/opt/plugin \
 	-e PLUGIN_PATH=/opt/plugin \
-	-e PLUGIN_NAME=$(PLUGIN_NAME) \
-	$(IMAGE_NAME)
+	-e PLUGIN_NAME=$(PLUGIN_NAME)
 
-DOCKER_RUN_IT = docker run --rm -it \
-	-v "$(PLUGIN_DIR)":/opt/plugin \
-	-e PLUGIN_PATH=/opt/plugin \
-	-e PLUGIN_NAME=$(PLUGIN_NAME) \
-	$(IMAGE_NAME)
+# Standard run (no network)
+DOCKER_RUN = docker run $(DOCKER_OPTS) $(IMAGE_NAME)
+
+# Network-enabled run (for e2e tests, API calls, etc.)
+DOCKER_RUN_NETWORK = docker run --network=host $(DOCKER_OPTS) $(IMAGE_NAME)
+
+# Interactive run
+DOCKER_RUN_IT = docker run -it $(DOCKER_OPTS) $(IMAGE_NAME)
 
 # =============================================================================
 # Help
@@ -97,14 +100,14 @@ test: docker-build ## Run Lua tests (excludes e2e)
 		/opt/plugin/$(SPEC_DIR)/
 
 .PHONY: test-all
-test-all: docker-build ## Run all Lua tests including e2e
-	$(DOCKER_RUN) busted-koreader --verbose \
+test-all: docker-build ## Run all Lua tests including e2e (with network)
+	$(DOCKER_RUN_NETWORK) busted-koreader --verbose \
 		--helper=$(COMMONREQUIRE) \
 		/opt/plugin/$(SPEC_DIR)/
 
 .PHONY: test-e2e
-test-e2e: docker-build ## Run only e2e tests
-	$(DOCKER_RUN) busted-koreader --verbose \
+test-e2e: docker-build ## Run only e2e tests (with network)
+	$(DOCKER_RUN_NETWORK) busted-koreader --verbose \
 		--helper=$(COMMONREQUIRE) \
 		--filter=e2e \
 		/opt/plugin/$(SPEC_DIR)/
