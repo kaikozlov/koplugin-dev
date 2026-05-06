@@ -23,9 +23,6 @@ KOREADER_VERSION ?= v2026.03
 # Docker image name
 IMAGE_NAME ?= koplugin-dev:$(KOREADER_VERSION)
 
-# Architecture: arm64 on Apple Silicon, x86_64 elsewhere
-DOCKER_ARCH ?= $(shell uname -m | sed 's/arm64/aarch64/' | grep -q aarch64 && echo arm64 || echo x86_64)
-
 # Plugin source directory (current directory by default)
 PLUGIN_DIR ?= $(shell pwd)
 
@@ -75,7 +72,6 @@ docker-build: ## Build the koplugin-dev Docker image
 		echo "Building $(IMAGE_NAME)..."; \
 		docker build \
 			--build-arg KOREADER_VERSION=$(KOREADER_VERSION) \
-			--build-arg ARCH=$(DOCKER_ARCH) \
 			-t $(IMAGE_NAME) \
 			$${KOPLUGIN_DEV_DIR:-/opt/koplugin-dev}; \
 	else \
@@ -86,7 +82,6 @@ docker-build: ## Build the koplugin-dev Docker image
 docker-rebuild: ## Force rebuild the Docker image
 	docker build \
 		--build-arg KOREADER_VERSION=$(KOREADER_VERSION) \
-		--build-arg ARCH=$(DOCKER_ARCH) \
 		-t $(IMAGE_NAME) \
 		$${KOPLUGIN_DEV_DIR:-/opt/koplugin-dev}
 

@@ -14,14 +14,11 @@
 
 ARG KOREADER_VERSION=v2026.03
 ARG GO_VERSION=1.24.2
-# Architecture: x86_64 or arm64 (auto-detected by Makefile)
-ARG ARCH=arm64
 
 FROM ubuntu:24.04
 
 ARG KOREADER_VERSION
 ARG GO_VERSION
-ARG ARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -65,7 +62,7 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
 # =============================================================================
 # Go toolchain
 # =============================================================================
-RUN GOARCH=$([ "$ARCH" = "arm64" ] && echo "arm64" || echo "amd64") && \
+RUN GOARCH=$(dpkg --print-architecture) && \
     curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${GOARCH}.tar.gz" \
       | tar -C /usr/local -xzf - && \
     /usr/local/go/bin/go version
@@ -86,7 +83,7 @@ COPY --from=johnnymorganz/stylua:2.4.1 /stylua /usr/local/bin/stylua
 RUN stylua --version
 
 # lua-language-server
-RUN LLS_ARCH=$([ "$ARCH" = "arm64" ] && echo "arm64" || echo "x64") && \
+RUN LLS_ARCH=$(dpkg --print-architecture | sed 's/amd64/x64/') && \
     curl -fsSL "https://github.com/LuaLS/lua-language-server/releases/download/3.13.5/lua-language-server-3.13.5-linux-${LLS_ARCH}.tar.gz" \
       -o /tmp/lls.tar.gz && \
     mkdir -p /opt/lua-language-server && \
@@ -98,8 +95,9 @@ RUN LLS_ARCH=$([ "$ARCH" = "arm64" ] && echo "arm64" || echo "x64") && \
 # KOReader Linux release
 # =============================================================================
 RUN mkdir -p /opt && \
+    KOREADER_ARCH=$(dpkg --print-architecture | sed 's/amd64/x86_64/') && \
     curl -fsSL -o /tmp/koreader.tar.xz \
-      "https://github.com/koreader/koreader/releases/download/${KOREADER_VERSION}/koreader-linux-${ARCH}-${KOREADER_VERSION}.tar.xz" && \
+      "https://github.com/koreader/koreader/releases/download/${KOREADER_VERSION}/koreader-linux-${KOREADER_ARCH}-${KOREADER_VERSION}.tar.xz" && \
     tar xf /tmp/koreader.tar.xz -C /opt/ && \
     rm /tmp/koreader.tar.xz && \
     /opt/lib/koreader/luajit -v

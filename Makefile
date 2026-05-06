@@ -2,7 +2,6 @@
 
 KOREADER_VERSION ?= v2026.03
 GO_VERSION ?= 1.24.2
-DOCKER_ARCH ?= $(shell uname -m | sed 's/arm64/aarch64/' | grep -q aarch64 && echo arm64 || echo x86_64)
 IMAGE_NAME ?= koplugin-dev:$(KOREADER_VERSION)
 
 .PHONY: help
@@ -15,7 +14,6 @@ docker-build: ## Build the koplugin-dev Docker image
 	docker build \
 		--build-arg KOREADER_VERSION=$(KOREADER_VERSION) \
 		--build-arg GO_VERSION=$(GO_VERSION) \
-		--build-arg ARCH=$(DOCKER_ARCH) \
 		-t $(IMAGE_NAME) .
 
 .PHONY: docker-rebuild
@@ -23,7 +21,6 @@ docker-rebuild: ## Force rebuild (no cache)
 	docker build --no-cache \
 		--build-arg KOREADER_VERSION=$(KOREADER_VERSION) \
 		--build-arg GO_VERSION=$(GO_VERSION) \
-		--build-arg ARCH=$(DOCKER_ARCH) \
 		-t $(IMAGE_NAME) .
 
 .PHONY: shell
