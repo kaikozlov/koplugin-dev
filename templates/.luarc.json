@@ -1,0 +1,33 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime": {
+    "version": "LuaJIT"
+  },
+  "workspace": {
+    "library": [
+      "/opt/lib/koreader/frontend",
+      "/opt/lib/koreader/common"
+    ],
+    "checkThirdParty": false
+  },
+  "diagnostics": {
+    "globals": [
+      "G_reader_settings",
+      "G_defaults",
+      "einkfb",
+      "load_plugin",
+      "disable_plugins",
+      "fastforward_ui_events",
+      "get_test_data_dir",
+      "get_plugin_path",
+      "TEST_DATA_DIR",
+      "PLUGIN_PATH"
+    ],
+    "disable": [
+      "lowercase-global"
+    ]
+  },
+  "hint": {
+    "enable": true
+  }
+}

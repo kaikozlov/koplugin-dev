@@ -1,0 +1,39 @@
+{
+  "name": "koplugin-dev",
+  "image": "koplugin-dev:v2026.03",
+  "workspaceFolder": "/opt/plugin",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/opt/plugin,type=bind",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "sumneko.lua",
+        "golang.go",
+        "JohnnyMorganz.stylua"
+      ],
+      "settings": {
+        "Lua.workspace.library": [
+          "/opt/lib/koreader/frontend",
+          "/opt/lib/koreader/common"
+        ],
+        "Lua.runtime.version": "LuaJIT",
+        "Lua.diagnostics.globals": [
+          "G_reader_settings",
+          "G_defaults",
+          "einkfb",
+          "load_plugin",
+          "disable_plugins",
+          "fastforward_ui_events",
+          "get_test_data_dir",
+          "get_plugin_path",
+          "TEST_DATA_DIR",
+          "PLUGIN_PATH"
+        ],
+        "go.toolsManagement.autoUpdate": false
+      }
+    }
+  },
+
+  "remoteUser": "root",
+  "postCreateCommand": "echo 'koplugin-dev ready'"
+}
