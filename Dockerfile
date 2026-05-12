@@ -13,7 +13,7 @@
 # Plugin repos extend this with a thin Dockerfile or use directly via devcontainer.
 
 ARG KOREADER_VERSION=v2026.03
-ARG GO_VERSION=1.24.2
+ARG GO_VERSION=1.26.3
 
 FROM ubuntu:24.04
 
