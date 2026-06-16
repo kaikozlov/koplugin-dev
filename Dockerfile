@@ -13,12 +13,23 @@
 # Plugin repos extend this with a thin Dockerfile or use directly via devcontainer.
 
 ARG KOREADER_VERSION=v2026.03
-ARG GO_VERSION=1.26.3
+ARG GO_VERSION=1.26.4
+ARG GOLANGCI_LINT_VERSION=2.12.2
+ARG STYLUA_VERSION=2.5.2
+ARG LLS_VERSION=3.18.2
+ARG UBUNTU_VERSION=24.04
 
-FROM ubuntu:24.04
+# stylua image used as a binary source (stages support ARG expansion; --from does not)
+FROM johnnymorganz/stylua:${STYLUA_VERSION} AS stylua-bin
+
+FROM ubuntu:${UBUNTU_VERSION}
 
 ARG KOREADER_VERSION
 ARG GO_VERSION
+ARG GOLANGCI_LINT_VERSION
+ARG STYLUA_VERSION
+ARG LLS_VERSION
+ARG UBUNTU_VERSION
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -28,14 +39,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     # Build essentials
     build-essential \
-    gcc \
-    make \
     pkg-config \
+    just \
     # KOReader dependencies
     ca-certificates \
     curl \
     xz-utils \
-    libc6-dev \
     libssl3t64 \
     # Lua testing (busted + all deps)
     lua-busted \
@@ -46,7 +55,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     jq \
     git \
     unzip \
-    # Editor support
     && rm -rf /var/lib/apt/lists/*
 
 # =============================================================================
@@ -71,20 +79,23 @@ ENV PATH="/usr/local/go/bin:/root/go/bin:${PATH}"
 ENV GOPATH="/root/go"
 
 # golangci-lint
-RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh \
-      | sh -s -- -b /usr/local/bin v1.64.5
+# NOTE: use golangci-lint.run, NOT the abandoned `master` branch script.
+# The old script greps checksums.txt without an end-anchor, so it also matches the
+# *.sbom.json line and checksum verification fails on every modern release.
+RUN curl -sSfL https://golangci-lint.run/install.sh \
+      | sh -s -- -b /usr/local/bin "v${GOLANGCI_LINT_VERSION}"
 
 # =============================================================================
 # Lua tooling (not in apt)
 # =============================================================================
 
 # stylua (Lua formatter)
-COPY --from=johnnymorganz/stylua:2.4.1 /stylua /usr/local/bin/stylua
+COPY --from=stylua-bin /stylua /usr/local/bin/stylua
 RUN stylua --version
 
 # lua-language-server
 RUN LLS_ARCH=$(dpkg --print-architecture | sed 's/amd64/x64/') && \
-    curl -fsSL "https://github.com/LuaLS/lua-language-server/releases/download/3.13.5/lua-language-server-3.13.5-linux-${LLS_ARCH}.tar.gz" \
+    curl -fsSL "https://github.com/LuaLS/lua-language-server/releases/download/${LLS_VERSION}/lua-language-server-${LLS_VERSION}-linux-${LLS_ARCH}.tar.gz" \
       -o /tmp/lls.tar.gz && \
     mkdir -p /opt/lua-language-server && \
     tar -xzf /tmp/lls.tar.gz -C /opt/lua-language-server && \
