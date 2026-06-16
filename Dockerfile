@@ -8,7 +8,7 @@
 #   - CLI tools (rg, fd, jq, gh)
 #
 # Usage:
-#   docker build --build-arg KOREADER_VERSION=v2026.03 -t koplugin-dev:v2026.03 .
+#   just docker-build
 #
 # Plugin repos extend this with a thin Dockerfile or use directly via devcontainer.
 
@@ -132,7 +132,7 @@ RUN printf '#!/bin/sh\nexec %s /usr/bin/busted "$@"\n' "${KOREADER_DIR}/luajit" 
 # Shared koplugin-dev infrastructure
 # =============================================================================
 COPY commonrequire.lua /opt/koplugin-dev/commonrequire.lua
-COPY shared.mk /opt/koplugin-dev/shared.mk
+COPY shared.just /opt/koplugin-dev/shared.just
 
 # Plugin mount point — plugins bind-mount their source here
 RUN mkdir -p /opt/plugin

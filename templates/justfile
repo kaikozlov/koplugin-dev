@@ -1,0 +1,12 @@
+# justfile for <PLUGIN_NAME>.koplugin
+#
+# This imports shared recipes from koplugin-dev.
+# If your plugin repo is not next to koplugin-dev, update the import path below.
+
+plugin_name := "<PLUGIN_NAME>"
+
+import "../koplugin-dev/shared.just"
+
+# Plugin-specific recipes go below.
+build:
+    ./build.sh
