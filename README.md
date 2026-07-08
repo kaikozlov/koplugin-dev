@@ -132,9 +132,9 @@ just docker-build
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| Ubuntu | 24.04 | Base OS |
+| Ubuntu | 26.04 | Base OS |
 | KOReader | v2026.03 | Real runtime for testing |
-| Go | 1.26.4 | Build Go-based plugins |
+| Go | 1.26.5 | Build Go-based plugins |
 | golangci-lint | 2.12.2 | Go linting |
 | busted | apt | Lua testing |
 | luacheck | apt | Lua linting |

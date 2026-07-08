@@ -13,11 +13,11 @@
 # Plugin repos extend this with a thin Dockerfile or use directly via devcontainer.
 
 ARG KOREADER_VERSION=v2026.03
-ARG GO_VERSION=1.26.4
+ARG GO_VERSION=1.26.5
 ARG GOLANGCI_LINT_VERSION=2.12.2
 ARG STYLUA_VERSION=2.5.2
 ARG LLS_VERSION=3.18.2
-ARG UBUNTU_VERSION=24.04
+ARG UBUNTU_VERSION=26.04
 
 # stylua image used as a binary source (stages support ARG expansion; --from does not)
 FROM johnnymorganz/stylua:${STYLUA_VERSION} AS stylua-bin
