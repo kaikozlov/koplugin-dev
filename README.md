@@ -10,33 +10,34 @@ Development environment for KOReader plugins. One Docker image with everything y
 
 ## Quick Start
 
-Consumers pin a published GHCR image and import shared recipes from a sibling
-checkout of this repo:
-
-```text
-~/dev/projects/
-  koplugin-dev/
-  myplugin.koplugin/
-```
+Plugins **vendor** `shared.just` into the repo under `just/shared.just`
+(committed) and pin a published GHCR image. Contributors only need Docker +
+`just` — no sibling clone of this repo. Use `just/` rather than `vendor/` so
+Go does not treat it as a module vendor tree.
 
 ```bash
-# One-time: pull the image + install git hooks
-cd ../myplugin.koplugin
-just setup
-
+cd myplugin.koplugin
+just setup     # install git hooks + pull the image
 just test      # quiet by default; V=1 for full output
 just check     # fmt + lint + test (pre-commit)
-just shell     # drop into the container
+just shell
 ```
 
 ## Using in Your Plugin
 
-### 1. Create a justfile
+### 1. Create a justfile and vendor shared recipes
+
+```bash
+mkdir -p just
+curl -fsSL https://raw.githubusercontent.com/kaikozlov/koplugin-dev/main/shared.just \
+  -o just/shared.just
+```
 
 ```just
 # justfile
 plugin_name := "myplugin"
 koplugin_dev_version := "v2026.03_4"
+koplugin_dev_ref := env("KOPLUGIN_DEV_REF", "main")
 plugin_path := "/opt/plugin"       # nested Lua plugins: "/opt/plugin/lua"
 spec_dir := "spec"                 # nested: "lua/spec"
 lua_paths := "."                   # stylua/luacheck paths under /opt/plugin
@@ -44,11 +45,29 @@ has_go := "0"                      # "1" for Go+Lua plugins
 go_integration_packages := ""      # e.g. "./internal/foo/..."
 exclude_tags := "e2e"
 
-# Requires a sibling checkout of koplugin-dev.
-import "../koplugin-dev/shared.just"
+import "./just/shared.just"
+
+# Refresh recipes from upstream (then commit just/shared.just):
+sync-shared:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ref="{{ koplugin_dev_ref }}"
+    mkdir -p just
+    tmp="$(mktemp)"
+    curl -fsSL "https://raw.githubusercontent.com/kaikozlov/koplugin-dev/${ref}/shared.just" -o "$tmp"
+    {
+        echo "# Vendored from https://github.com/kaikozlov/koplugin-dev"
+        echo "# Ref: ${ref}"
+        echo "# Refresh with: just sync-shared"
+        echo
+        cat "$tmp"
+    } > just/shared.just
+    rm -f "$tmp"
 
 # Product-specific recipes (packaging, etc.) go below.
 ```
+
+Or copy `templates/justfile` and run `just sync-shared` once.
 
 The shared recipes give you:
 
@@ -69,39 +88,46 @@ Quiet by default. Use `V=1 just test` for full busted/go output.
 Optional image override (local build instead of GHCR):
 
 ```bash
+# Requires a local koplugin-dev checkout (or KOPLUGIN_DEV_DIR):
+just docker-build
 IMAGE_NAME=koplugin-dev:v2026.03 just test
 ```
 
-### 2. CI dual-checkout
+### 2. Keeping `just/shared.just` up to date
 
-`actions/checkout` cannot use `..`, so CI layouts the workspace as siblings:
+`shared.just` lives in this repo. Plugins commit a copy under `just/`.
+
+When recipes change here:
+
+1. Merge/push to `koplugin-dev`
+2. In each plugin: `just sync-shared` (optional: `KOPLUGIN_DEV_REF=<sha> just sync-shared`)
+3. Commit the updated `just/shared.just`
+
+Image pin (`koplugin_dev_version`) and recipe sync (`koplugin_dev_ref`) are
+independent — bump the image when GHCR publishes a new `_N` tag; sync recipes
+whenever `shared.just` changes.
+
+### 3. CI
+
+Normal single-repo checkout is enough (vendored file is in the tree):
 
 ```yaml
-defaults:
-  run:
-    working-directory: myplugin.koplugin
-
 steps:
   - uses: actions/checkout@v7
-    with:
-      path: myplugin.koplugin
-  - uses: actions/checkout@v7
-    with:
-      repository: kaikozlov/koplugin-dev
-      path: koplugin-dev
+  - run: # install just
   - run: just setup
   - run: just fmt-check
   - run: just lint
   - run: just test
 ```
 
-### 3. Pre-commit
+### 4. Pre-commit
 
 Ship `.githooks/pre-commit` that runs `just check` and re-stages previously
 staged files after auto-format. `just setup` points `core.hooksPath` at
 `.githooks`.
 
-### 4. Devcontainer / .luarc.json (optional)
+### 5. Devcontainer / .luarc.json (optional)
 
 ```bash
 mkdir -p .devcontainer
@@ -117,7 +143,6 @@ Tests run via `busted-koreader` which uses KOReader's bundled LuaJIT. The `commo
 -- spec/myfeature_spec.lua
 describe("My feature", function()
     it("does something", function()
-        -- Real KOReader modules available
         local UIManager = require("ui/uimanager")
         assert.is.truthy(UIManager)
     end)
@@ -125,7 +150,6 @@ describe("My feature", function()
     it("loads the plugin", function()
         disable_plugins()
         load_plugin("myplugin")
-        -- Plugin is now loaded into real PluginLoader
     end)
 end)
 ```
@@ -183,7 +207,7 @@ koplugin-dev/
 ├── Dockerfile           # The one image
 ├── justfile             # Recipes for this repo
 ├── commonrequire.lua    # Shared busted bootstrap
-├── shared.just          # Shared plugin recipes (host-side import)
+├── shared.just          # Shared plugin recipes (vendored by consumers)
 ├── templates/
 │   ├── devcontainer.json
 │   ├── justfile

@@ -1,6 +1,7 @@
 # shared.just — Common just recipes for KOReader plugins
 #
-# Import from a sibling checkout of koplugin-dev:
+# Source of truth: https://github.com/kaikozlov/koplugin-dev
+# Plugins vendor this file (e.g. vendor/shared.just) and import it:
 #
 #   plugin_name := "myplugin"
 #   koplugin_dev_version := "v2026.03_4"
@@ -10,7 +11,10 @@
 #   has_go := "0"                           # "1" for Go+Lua plugins
 #   go_integration_packages := ""           # e.g. "./internal/foo/..." or ""
 #   exclude_tags := "e2e"
-#   import "../koplugin-dev/shared.just"
+#   import "./just/shared.just"
+#
+# Refresh a vendored copy with: just sync-shared
+# Use just/ (not vendor/) so Go does not treat the directory as a module vendor tree.
 #
 # Image: GHCR by default. Override with IMAGE_NAME=... for a local build.
 # Verbosity: quiet by default; V=1 for full busted/go output.
@@ -18,8 +22,9 @@
 
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
+# Optional local Dockerfile tree for docker-build (sibling checkout or override).
 [private]
-_koplugin_dev_dir := source_directory()
+_koplugin_dev_dir := env_var_or_default("KOPLUGIN_DEV_DIR", justfile_directory() + "/../koplugin-dev")
 
 [private]
 _image := env_var_or_default("IMAGE_NAME", "ghcr.io/kaikozlov/koplugin-dev:" + koplugin_dev_version)
