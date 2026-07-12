@@ -10,15 +10,22 @@ Development environment for KOReader plugins. One Docker image with everything y
 
 ## Quick Start
 
-```bash
-# Build the base image
-cd koplugin-dev
-just docker-build
+Consumers pin a published GHCR image and import shared recipes from a sibling
+checkout of this repo:
 
-# Use it in your plugin
+```text
+~/dev/projects/
+  koplugin-dev/
+  myplugin.koplugin/
+```
+
+```bash
+# One-time: pull the image + install git hooks
 cd ../myplugin.koplugin
-just test      # runs busted against real KOReader
-just lint      # luacheck + golangci-lint
+just setup
+
+just test      # quiet by default; V=1 for full output
+just check     # fmt + lint + test (pre-commit)
 just shell     # drop into the container
 ```
 
@@ -29,47 +36,76 @@ just shell     # drop into the container
 ```just
 # justfile
 plugin_name := "myplugin"
+koplugin_dev_version := "v2026.03_4"
+plugin_path := "/opt/plugin"       # nested Lua plugins: "/opt/plugin/lua"
+spec_dir := "spec"                 # nested: "lua/spec"
+lua_paths := "."                   # stylua/luacheck paths under /opt/plugin
+has_go := "0"                      # "1" for Go+Lua plugins
+go_integration_packages := ""      # e.g. "./internal/foo/..."
+exclude_tags := "e2e"
 
-# Update this import path if your plugin repo is not next to koplugin-dev.
+# Requires a sibling checkout of koplugin-dev.
 import "../koplugin-dev/shared.just"
+
+# Product-specific recipes (packaging, etc.) go below.
 ```
 
 The shared recipes give you:
 
 | Recipe | What it does |
 |--------|-------------|
-| `test` | Run Lua tests (excludes e2e) |
-| `test-all` | Run all Lua tests |
-| `test-go` | Run Go tests |
-| `lint` | Run luacheck + golangci-lint |
-| `fmt` | Format Lua + Go |
-| `build-go-arm` | Cross-compile for Kindle/Kobo |
-| `shell` | Interactive bash in container |
+| `setup` | Install `.githooks` + `docker pull` GHCR image |
+| `test` | Lua tests (excludes e2e); Go `-race` when `has_go=1` |
+| `test-filter` | Filtered Lua tests |
+| `test-e2e` / `test-all` | Network tests (`--network=host`) |
+| `test-go` / `test-go-race` / `test-go-integration` | Go tests |
+| `lint` / `fmt` / `fmt-check` | One-container aggregates |
+| `check` | fmt + lint + test (pre-commit) |
+| `build-go` / `build-go-arm` | Go builds |
+| `shell` / `lua` | Interactive container |
 
-Optional environment overrides:
+Quiet by default. Use `V=1 just test` for full busted/go output.
+
+Optional image override (local build instead of GHCR):
 
 ```bash
 IMAGE_NAME=koplugin-dev:v2026.03 just test
-SPEC_DIR=tests just test
-EXCLUDE_TAGS='e2e,slow' just test
 ```
 
-### 2. Set up devcontainer (optional)
+### 2. CI dual-checkout
 
-Copy `templates/devcontainer.json` to `.devcontainer/devcontainer.json` in your plugin:
+`actions/checkout` cannot use `..`, so CI layouts the workspace as siblings:
+
+```yaml
+defaults:
+  run:
+    working-directory: myplugin.koplugin
+
+steps:
+  - uses: actions/checkout@v7
+    with:
+      path: myplugin.koplugin
+  - uses: actions/checkout@v7
+    with:
+      repository: kaikozlov/koplugin-dev
+      path: koplugin-dev
+  - run: just setup
+  - run: just fmt-check
+  - run: just lint
+  - run: just test
+```
+
+### 3. Pre-commit
+
+Ship `.githooks/pre-commit` that runs `just check` and re-stages previously
+staged files after auto-format. `just setup` points `core.hooksPath` at
+`.githooks`.
+
+### 4. Devcontainer / .luarc.json (optional)
 
 ```bash
 mkdir -p .devcontainer
 cp /path/to/koplugin-dev/templates/devcontainer.json .devcontainer/
-```
-
-Then open in VS Code/Cursor and select "Reopen in Container".
-
-### 3. Add .luarc.json (optional)
-
-For Lua language server support:
-
-```bash
 cp /path/to/koplugin-dev/templates/.luarc.json .
 ```
 
@@ -114,18 +150,17 @@ From `commonrequire.lua`:
 
 ## Image Versioning
 
-The Dockerfile is the source of truth for pinned versions. Update the `ARG` constants at the top of `Dockerfile`, then rebuild:
+Published images use `v{KOREADER_VERSION}_{N}` tags on GHCR, e.g.
+`ghcr.io/kaikozlov/koplugin-dev:v2026.03_4`. Bump `koplugin_dev_version` in
+each plugin justfile when the image updates.
+
+Local builds (optional) derive the tag from `ARG KOREADER_VERSION` in the
+Dockerfile (no `_N` suffix):
 
 ```bash
-just docker-rebuild
-```
-
-The default local image tag is derived from `ARG KOREADER_VERSION`:
-
-```bash
-# ARG KOREADER_VERSION=v2026.03
-just docker-build
-# builds: koplugin-dev:v2026.03
+cd koplugin-dev
+just docker-build   # builds koplugin-dev:v2026.03
+IMAGE_NAME=koplugin-dev:v2026.03 just test
 ```
 
 ## What's Inside
@@ -148,7 +183,7 @@ koplugin-dev/
 ├── Dockerfile           # The one image
 ├── justfile             # Recipes for this repo
 ├── commonrequire.lua    # Shared busted bootstrap
-├── shared.just          # Shared plugin recipes
+├── shared.just          # Shared plugin recipes (host-side import)
 ├── templates/
 │   ├── devcontainer.json
 │   ├── justfile

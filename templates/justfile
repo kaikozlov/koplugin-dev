@@ -1,12 +1,17 @@
 # justfile for <PLUGIN_NAME>.koplugin
 #
-# This imports shared recipes from koplugin-dev.
-# If your plugin repo is not next to koplugin-dev, update the import path below.
+# Shared recipes come from a sibling checkout of koplugin-dev.
+# Update the import path if your layout differs.
 
 plugin_name := "<PLUGIN_NAME>"
+koplugin_dev_version := "v2026.03_4"
+plugin_path := "/opt/plugin"
+spec_dir := "spec"
+lua_paths := "."
+has_go := "0"
+go_integration_packages := ""
+exclude_tags := "e2e"
 
 import "../koplugin-dev/shared.just"
 
-# Plugin-specific recipes go below.
-build:
-    ./build.sh
+# Plugin-specific recipes go below (packaging, etc.).
