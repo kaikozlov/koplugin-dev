@@ -55,6 +55,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     jq \
     git \
     unzip \
+    zip \
     && rm -rf /var/lib/apt/lists/*
 
 # =============================================================================
