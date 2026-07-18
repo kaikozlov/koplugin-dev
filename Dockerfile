@@ -5,7 +5,7 @@
 #   - Go toolchain + golangci-lint
 #   - Lua tooling: busted, luacheck, stylua, lua-language-server
 #   - Build essentials (gcc, make)
-#   - CLI tools (rg, fd, jq, gh)
+#   - CLI tools (rg, fd, jq, gh, qemu-arm)
 #
 # Usage:
 #   just docker-build
@@ -54,6 +54,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fd-find \
     jq \
     git \
+    qemu-user \
     unzip \
     zip \
     && rm -rf /var/lib/apt/lists/*
@@ -153,6 +154,7 @@ RUN echo "=== koplugin-dev ===" && \
     echo "busted: $(/usr/local/bin/busted-koreader --version)" && \
     echo "luacheck: $(luacheck --version)" && \
     echo "stylua: $(stylua --version)" && \
-    echo "lua-language-server: $(lua-language-server --version)"
+    echo "lua-language-server: $(lua-language-server --version)" && \
+    echo "qemu-arm: $(qemu-arm --version | head -1)"
 
 CMD ["/bin/bash"]

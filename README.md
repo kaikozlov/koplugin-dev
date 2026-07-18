@@ -6,7 +6,7 @@ Development environment for KOReader plugins. One Docker image with everything y
 - **Go toolchain** — build, test, lint, format
 - **Lua toolchain** — busted, luacheck, stylua, lua-language-server
 - **Build essentials** — compiler/toolchain support for native deps
-- **CLI tools** — rg, fd, jq, gh, just
+- **CLI tools** — rg, fd, jq, gh, qemu-arm, just
 
 ## Quick Start
 
@@ -36,7 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/kaikozlov/koplugin-dev/main/shared.
 ```just
 # justfile
 plugin_name := "myplugin"
-koplugin_dev_version := "v2026.03_5"
+koplugin_dev_version := "v2026.03_6"
 koplugin_dev_ref := env("KOPLUGIN_DEV_REF", "main")
 plugin_path := "/opt/plugin"       # nested Lua plugins: "/opt/plugin/lua"
 spec_dir := "spec"                 # nested: "lua/spec"
@@ -199,6 +199,7 @@ IMAGE_NAME=koplugin-dev:v2026.03 just test
 | luacheck | apt | Lua linting |
 | stylua | 2.5.2 | Lua formatting |
 | lua-language-server | 3.18.2 | Editor support |
+| QEMU user mode | apt | Legacy ARM compatibility testing |
 
 ## Architecture
 
