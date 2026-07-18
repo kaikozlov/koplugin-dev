@@ -36,7 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/kaikozlov/koplugin-dev/main/shared.
 ```just
 # justfile
 plugin_name := "myplugin"
-koplugin_dev_version := "v2026.03_4"
+koplugin_dev_version := "v2026.03_5"
 koplugin_dev_ref := env("KOPLUGIN_DEV_REF", "main")
 plugin_path := "/opt/plugin"       # nested Lua plugins: "/opt/plugin/lua"
 spec_dir := "spec"                 # nested: "lua/spec"
@@ -175,7 +175,7 @@ From `commonrequire.lua`:
 ## Image Versioning
 
 Published images use `v{KOREADER_VERSION}_{N}` tags on GHCR, e.g.
-`ghcr.io/kaikozlov/koplugin-dev:v2026.03_4`. Bump `koplugin_dev_version` in
+`ghcr.io/kaikozlov/koplugin-dev:v2026.03_5`. Bump `koplugin_dev_version` in
 each plugin justfile when the image updates.
 
 Local builds (optional) derive the tag from `ARG KOREADER_VERSION` in the
