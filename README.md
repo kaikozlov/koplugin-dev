@@ -175,7 +175,7 @@ From `commonrequire.lua`:
 ## Image Versioning
 
 Published images use `v{KOREADER_VERSION}_{N}` tags on GHCR, e.g.
-`ghcr.io/kaikozlov/koplugin-dev:v2026.03_5`. Bump `koplugin_dev_version` in
+`ghcr.io/kaikozlov/koplugin-dev:v2026.03_6`. Bump `koplugin_dev_version` in
 each plugin justfile when the image updates.
 
 Local builds (optional) derive the tag from `ARG KOREADER_VERSION` in the
