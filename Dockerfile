@@ -46,6 +46,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     xz-utils \
     libssl3t64 \
+    # Translations (provides msgfmt + xgettext)
+    gettext \
     # Lua testing (busted + all deps)
     lua-busted \
     lua-check \
