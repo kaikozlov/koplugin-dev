@@ -12,6 +12,7 @@ plugin_path := "/opt/plugin"
 spec_dir := "spec"
 lua_paths := "."
 has_go := "0"
+# Package patterns plus optional go test selection flags, or empty to disable.
 go_integration_packages := ""
 exclude_tags := "e2e"
 

@@ -6,7 +6,7 @@ Development environment for KOReader plugins. One Docker image with everything y
 - **Go toolchain** — build, test, lint, format
 - **Lua toolchain** — busted, luacheck, stylua, lua-language-server
 - **Build essentials** — compiler/toolchain support for native deps
-- **CLI tools** — rg, fd, jq, gh, qemu-arm, just
+- **CLI tools** — rg, fd, jq, gh, qemu-arm, just, gettext
 
 ## Quick Start
 
@@ -19,7 +19,7 @@ Go does not treat it as a module vendor tree.
 cd myplugin.koplugin
 just setup     # install git hooks + pull the image
 just test      # quiet by default; V=1 for full output
-just check     # fmt + lint + test (pre-commit)
+just check     # format (mutating) + lint + test
 just shell
 ```
 
@@ -42,7 +42,7 @@ plugin_path := "/opt/plugin"       # nested Lua plugins: "/opt/plugin/lua"
 spec_dir := "spec"                 # nested: "lua/spec"
 lua_paths := "."                   # stylua/luacheck paths under /opt/plugin
 has_go := "0"                      # "1" for Go+Lua plugins
-go_integration_packages := ""      # e.g. "./internal/foo/..."
+go_integration_packages := ""      # package patterns and optional selection flags
 exclude_tags := "e2e"
 
 import "./just/shared.just"
@@ -74,12 +74,13 @@ The shared recipes give you:
 | Recipe | What it does |
 |--------|-------------|
 | `setup` | Install `.githooks` + `docker pull` GHCR image |
+| `pull-image` | Pull the pinned image without changing Git configuration |
 | `test` | Lua tests (excludes e2e); Go `-race` when `has_go=1` |
 | `test-filter` | Filtered Lua tests |
 | `test-e2e` / `test-all` | Network tests (`--network=host`) |
 | `test-go` / `test-go-race` / `test-go-integration` | Go tests |
 | `lint` / `fmt` / `fmt-check` | One-container aggregates |
-| `check` | fmt + lint + test (pre-commit) |
+| `check` | Mutating fmt + lint + test pass |
 | `build-go` / `build-go-arm` | Go builds |
 | `shell` / `lua` | Interactive container |
 
@@ -115,17 +116,19 @@ Normal single-repo checkout is enough (vendored file is in the tree):
 steps:
   - uses: actions/checkout@v7
   - run: # install just
-  - run: just setup
+  - run: just pull-image
   - run: just fmt-check
   - run: just lint
   - run: just test
 ```
 
-### 4. Pre-commit
+### 4. Git hooks
 
-Ship `.githooks/pre-commit` that runs `just check` and re-stages previously
-staged files after auto-format. `just setup` points `core.hooksPath` at
-`.githooks`.
+Keep pre-commit fast and read-only (`just fmt-check`, then `just lint`), and run
+`just test` from `.githooks/pre-push`. This preserves the full local safety net
+without auto-formatting unrelated or partially staged work. `just setup` makes
+all checked-in files under `.githooks/` executable and points `core.hooksPath`
+at that directory.
 
 ### 5. Devcontainer / .luarc.json (optional)
 
