@@ -86,6 +86,28 @@ The shared recipes give you:
 
 Quiet by default. Use `V=1 just test` for full busted/go output.
 
+### One-container aggregate recipes
+
+Every top-level shared recipe launches one fresh container. A plugin can compose
+several recipes into a larger aggregate without nesting additional containers by
+re-entering its justfile through the private `_reenter` command:
+
+```just
+# One host `docker run`; verify-static and test execute inside it.
+verify:
+    {{ _run }} {{ _reenter }} _verify
+
+[private]
+_verify: verify-static test
+```
+
+`_reenter` sets the internal `KOPLUGIN_DEV_IN_CONTAINER=1` marker and preserves
+the image's `/opt/lib/koreader` working directory for native-library discovery.
+While that marker is present, `_run`, `_run_network`, and `_run_it` become empty
+prefixes, so the normal Just dependency graph and failure behavior are preserved
+inside the existing container. Use a separate top-level invocation for recipes that
+need different Docker settings, such as host networking or an interactive TTY.
+
 Optional image override (local build instead of GHCR):
 
 ```bash
