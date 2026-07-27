@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Image tag (e.g. v2026.03_1)"
+        description: "Image tag (e.g. v2026.07_1)"
         required: true
 
 env:
