@@ -36,7 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/kaikozlov/koplugin-dev/main/shared.
 ```just
 # justfile
 plugin_name := "myplugin"
-koplugin_dev_version := "v2026.07_1"
+koplugin_dev_version := "v2026.07.1_1"
 koplugin_dev_ref := env("KOPLUGIN_DEV_REF", "main")
 plugin_path := "/opt/plugin"       # nested Lua plugins: "/opt/plugin/lua"
 spec_dir := "spec"                 # nested: "lua/spec"
@@ -113,7 +113,7 @@ Optional image override (local build instead of GHCR):
 ```bash
 # Requires a local koplugin-dev checkout (or KOPLUGIN_DEV_DIR):
 just docker-build
-IMAGE_NAME=koplugin-dev:v2026.07 just test
+IMAGE_NAME=koplugin-dev:v2026.07.1 just test
 ```
 
 ### 2. Keeping `just/shared.just` up to date
@@ -200,7 +200,7 @@ From `commonrequire.lua`:
 ## Image Versioning
 
 Published images use `v{KOREADER_VERSION}_{N}` tags on GHCR, e.g.
-`ghcr.io/kaikozlov/koplugin-dev:v2026.07_1`. Bump `koplugin_dev_version` in
+`ghcr.io/kaikozlov/koplugin-dev:v2026.07.1_1`. Bump `koplugin_dev_version` in
 each plugin justfile when the image updates.
 
 Local builds (optional) derive the tag from `ARG KOREADER_VERSION` in the
@@ -208,8 +208,8 @@ Dockerfile (no `_N` suffix):
 
 ```bash
 cd koplugin-dev
-just docker-build   # builds koplugin-dev:v2026.07
-IMAGE_NAME=koplugin-dev:v2026.07 just test
+just docker-build   # builds koplugin-dev:v2026.07.1_1
+IMAGE_NAME=koplugin-dev:v2026.07.1_1 just test
 ```
 
 ## What's Inside
@@ -217,7 +217,7 @@ IMAGE_NAME=koplugin-dev:v2026.07 just test
 | Tool | Version | Purpose |
 |------|---------|---------|
 | Ubuntu | 26.04 | Base OS |
-| KOReader | v2026.07 | Real runtime for testing |
+| KOReader | v2026.07.1 | Real runtime for testing |
 | Go | 1.26.5 | Build Go-based plugins |
 | golangci-lint | 2.12.2 | Go linting |
 | busted | apt | Lua testing |

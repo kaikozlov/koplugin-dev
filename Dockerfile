@@ -12,7 +12,7 @@
 #
 # Plugin repos extend this with a thin Dockerfile or use directly via devcontainer.
 
-ARG KOREADER_VERSION=v2026.07
+ARG KOREADER_VERSION=v2026.07.1
 ARG GO_VERSION=1.26.5
 ARG GOLANGCI_LINT_VERSION=2.12.2
 ARG STYLUA_VERSION=2.5.2

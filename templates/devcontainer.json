@@ -1,6 +1,6 @@
 {
   "name": "koplugin-dev",
-  "image": "koplugin-dev:v2026.07",
+  "image": "koplugin-dev:v2026.07.1",
   "workspaceFolder": "/opt/plugin",
   "workspaceMount": "source=${localWorkspaceFolder},target=/opt/plugin,type=bind",
 
